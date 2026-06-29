@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # NestJS Server Instance 1
+  server1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3000
+      - INSTANCE_NAME=Server-1
+    # We expose the port internally, but we can also map it to host port 3001 if we want to access it directly
+    ports:
+      - "3001:3000"
+    restart: always
+
+  # NestJS Server Instance 2
+  server2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3000
+      - INSTANCE_NAME=Server-2
+    # We expose the port internally, but we can also map it to host port 3002 if we want to access it directly
+    ports:
+      - "3002:3000"
+    restart: always
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-load-balancer
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - server1
+      - server2
+    restart: always
